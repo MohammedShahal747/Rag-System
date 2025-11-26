@@ -28,11 +28,6 @@ try:
     statsmodels_available = True
 except:
     statsmodels_available = False
-
-
-# ======================= STYLING - FIXED FOR VISIBLE TEXT =======================
-
-
 def apply_custom_styling():
     """Apply CSS with VISIBLE dark text on light background"""
     st.markdown("""
@@ -94,10 +89,6 @@ def apply_custom_styling():
         }
     </style>
     """, unsafe_allow_html=True)
-
-
-# ======================= RAG AGENT =======================
-
 
 class RAGAgent:
     """Retrieval Augmented Generation Agent"""
@@ -169,10 +160,6 @@ class RAGAgent:
 
         return answer
 
-
-# ======================= COLUMN FINDER =======================
-
-
 class ColumnFinder:
     """Auto-detect columns"""
 
@@ -205,10 +192,6 @@ class ColumnFinder:
                 return col, "month"
         return None, None
 
-
-# ======================= AGENTS =======================
-
-
 class ETLAgent:
     def analyze(self, df: pd.DataFrame) -> Dict:
         return {
@@ -234,41 +217,33 @@ class AnalysisAgent:
         data_context = ""
 
         try:
-            # ===== WHY QUESTIONS =====
+     
             if "why" in q and ("performing" in q or "best" in q or "leading" in q or "strong" in q):
                 answer, data_context = self._analyze_why_performing(df)
 
-            # ===== AVERAGE QUESTIONS =====
             elif "average" in q and "rating" in q and "category" in q:
                 answer, data_context = self._analyze_average_rating(df)
 
-            # ===== HIGHEST/MAXIMUM QUESTIONS =====
             elif ("highest" in q or "maximum" in q) and "category" in q:
                 answer, data_context = self._analyze_highest_sales(df)
 
-            # ===== FORECAST QUESTIONS =====
             elif "forecast" in q or "predict" in q or "future" in q:
-                # This will be handled by ForecastAgent, return empty
+              
                 answer = ""
                 data_context = ""
 
-            # ===== PRODUCT STRENGTHS (NEW!) =====
             elif "strength" in q or "strong" in q or "advantage" in q:
                 answer, data_context = self._analyze_product_strengths(df)
 
-            # ===== COMPARISON QUESTIONS (NEW!) =====
             elif "compare" in q or "vs" in q or "versus" in q:
                 answer, data_context = self._analyze_comparison(df)
 
-            # ===== REVENUE/SALES QUESTIONS (NEW!) =====
             elif ("revenue" in q or "sales" in q or "income" in q) and ("total" in q or "by" in q):
                 answer, data_context = self._analyze_revenue(df)
 
-            # ===== PERFORMANCE QUESTIONS (NEW!) =====
             elif "performance" in q or "perform" in q or "rating" in q:
                 answer, data_context = self._analyze_performance(df)
 
-            # ===== CATCH-ALL: UNIVERSAL QUESTION HANDLER (NEW!) =====
             else:
                 answer, data_context = self._analyze_generic_question(df, question)
 
@@ -381,14 +356,12 @@ class AnalysisAgent:
                 answer = "🏆 PRODUCT STRENGTHS ANALYSIS\n"
                 answer += "=" * 60 + "\n\n"
 
-                # Find top products by rating
                 if product_col:
                     top_products = df.nlargest(5, rating_col)[[product_col, cat_col, rating_col]]
                     answer += "⭐ TOP RATED PRODUCTS:\n"
                     for _, row in top_products.iterrows():
                         answer += f"• {row[product_col]} ({row[cat_col]}): {row[rating_col]:.2f}/5.0\n"
 
-                # Category strengths
                 answer += "\n📊 CATEGORY STRENGTHS:\n"
                 cat_ratings = df.groupby(cat_col)[rating_col].mean().sort_values(ascending=False)
                 for cat, rating in cat_ratings.items():
@@ -495,7 +468,7 @@ class AnalysisAgent:
             answer = "📊 GENERAL DATA INSIGHTS\n"
             answer += "=" * 60 + "\n\n"
 
-            # Get available columns
+     
             cat_col = ColumnFinder.find_column(df, ["category", "type"])
             rating_col = ColumnFinder.find_column(df, ["rating", "score"])
             sales_col = ColumnFinder.find_metric_column(df, "sales")
@@ -554,7 +527,7 @@ class ForecastAgent:
             for i, val in enumerate(forecast_vals, 1):
                 answer += f"📈 Period {i}: ${val:,.0f}\n"
 
-            # INSIGHT SECTION
+           
             answer += "\n💡 INSIGHT:\n"
             avg_hist = ts.mean()
             avg_fore = np.mean(forecast_vals)
@@ -661,9 +634,6 @@ class MultiAgentOrchestrator:
             "is_error": "❌" in result_text,
             "has_rag": bool(rag_result)
         }
-
-
-# ======================= STREAMLIT UI =======================
 
 
 def main():
